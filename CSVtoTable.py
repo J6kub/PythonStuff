@@ -6,16 +6,17 @@ class TableCsv:
     def createRow(self, rawRow):
         '''Creates rows'''
         row = {}
-        splitRow = rawRow.split(',')
+        splitRow = rawRow.split(self.splitterType)
         for i in range(len(self.headish)):
             row[self.headish[i]] = splitRow[i]
         return row
 
-    def __init__(self, csvFile):
+    def __init__(self, csvFile, splitterType):
         self.file = open(csvFile,'r').read()
         rows = []
+        self.splitterType = splitterType
         self.splitted = self.file.splitlines()
-        self.headish = self.splitted[0].split(",")
+        self.headish = self.splitted[0].split(self.splitterType)
         for x in range(1, len(self.splitted)):
             rows.append(self.createRow(self.splitted[x]))
         self.rows = rows
@@ -33,9 +34,14 @@ class TableCsv:
             if x[htag] == value:
                 rows.append(x)
         return rows
+    def printRows(self):
+        for x in self.rows:
+            print(x)
+def printArray(arr):
+    for x in arr:
+        print(x)
 
-
-tt = TableCsv('country_full.csv')
+tt = TableCsv('country_full.csv', ",")
 
 tt.printItemTypes()
 
@@ -46,3 +52,8 @@ def printAllFromRegion(reg):
     print('done')
 
 printAllFromRegion("Asia")
+
+print(len(tt.getRowsByValue("region", "Americas")))
+
+tt2 = TableCsv('fakers.csv', ";")
+printArray(tt2.getRowsByValue("gay", "FALSE"))
