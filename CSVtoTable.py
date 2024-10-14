@@ -1,3 +1,17 @@
+#Jakub B, no rights reserved
+def is_floatable(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+assert is_floatable(10) == True
+assert is_floatable(10.23) == True
+assert is_floatable("10.34") == True
+assert is_floatable("13") == True
+assert is_floatable("pepe") == False
+assert is_floatable(".") == False
+
 class TableCsv:
     '''
     Input an array with rows split by comma: Function splits it automatically
@@ -6,13 +20,19 @@ class TableCsv:
     def createRow(self, rawRow):
         '''Creates rows'''
         row = {}
-        splitRow = rawRow.split(self.splitterType)
+        splitRowRaw = rawRow.split(self.splitterType)
+        splitRow = []
+        for elm in splitRowRaw:
+            if is_floatable(elm):
+                splitRow.append(float(elm))
+            else:
+                splitRow.append(elm)
         for i in range(len(self.headish)):
             row[self.headish[i]] = splitRow[i]
         return row
 
     def __init__(self, csvFile, splitterType):
-        self.file = open(csvFile,'r').read()
+        self.file = open(csvFile,'r',encoding='utf-8').read()
         rows = []
         self.splitterType = splitterType
         self.splitted = self.file.splitlines()
@@ -24,6 +44,11 @@ class TableCsv:
     def printItemTypes(self):
         for x in self.headish:
             print(x)
+    def getItemTypes(self):
+        res = []
+        for x in self.headish:
+            res.append(x)
+        return res
     def getRow(self,n):
         '''Returns Row'''
         return self.rows[n]
@@ -34,26 +59,11 @@ class TableCsv:
             if x[htag] == value:
                 rows.append(x)
         return rows
+    def getColumnList(self, column):
+        res = []
+        for row in self.rows:
+            res.append(row[column])
+        return res
     def printRows(self):
         for x in self.rows:
             print(x)
-def printArray(arr):
-    for x in arr:
-        print(x)
-
-tt = TableCsv('country_full.csv', ",")
-
-tt.printItemTypes()
-
-def printAllFromRegion(reg):
-    alls = tt.getRowsByValue("region", reg)
-    for x in alls:
-        print(x["name"])
-    print('done')
-
-printAllFromRegion("Asia")
-
-print(len(tt.getRowsByValue("region", "Americas")))
-
-tt2 = TableCsv('fakers.csv', ";")
-printArray(tt2.getRowsByValue("gay", "FALSE"))
