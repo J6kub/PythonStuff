@@ -33,17 +33,25 @@ class TableCsv:
             row[self.headish[i]] = splitRow[i]
         return row
 
-    def __init__(self, csvFile, splitterType):
+    def __init__(self, csvFile, splitterType, progress=False, rowLimit=9999999999):
         '''Converting CSV file into a table'''
         self.path = csvFile
-        self.file = open(csvFile,'r',encoding='utf-8').read()
-        rows = []
+        file = open(csvFile,'r',encoding='utf-8')
+        self.file = file.read()
+        file.close()
+        if progress == True: print("File opened!")
+        self.rows = []
         self.splitterType = splitterType
         self.splitted = self.file.splitlines()
+        if progress == True: print("File splitted into lines!")
         self.headish = self.splitted[0].split(self.splitterType)
+        if progress == True: print("Header Loaded!")
+
         for x in range(1, len(self.splitted)):
-            rows.append(self.createRow(self.splitted[x]))
-        self.rows = rows
+            if x > rowLimit: break
+            self.rows.append(self.createRow(self.splitted[x]))
+            if progress == True: print(f"Row {x} added")
+        self.splitted = None # Removes splitted for better Memory management
 
     def printItemTypes(self):
         '''Prints all headers'''
@@ -78,6 +86,9 @@ class TableCsv:
     def rowDefenestrateByValue(self,htag,vall):
         '''Htag column name - Deletes items with the value'''
         self.rows = [x for x in self.rows if x[htag] != vall]
+    def rowLeaveByValue(self,htag,vall):
+        '''Htag column name - Deletes items with the value'''
+        self.rows = [x for x in self.rows if x[htag] == vall]
     def rowDefenestrateN(self,index):
         '''Removes Row by index'''
         self.rows.pop(index)
