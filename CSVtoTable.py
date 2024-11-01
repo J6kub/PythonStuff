@@ -1,4 +1,5 @@
 #Jakub B, no rights reserved
+'''Examples on the bottom'''
 import csv
 import os
 def is_floatable(s):
@@ -21,6 +22,7 @@ class TableCsv:
     def createRow(self, rawRow):
         '''Creates rows - Also used for inserting rows into Table'''
         '''ex row ["10,10,20,30,50,"rowrow"]'''
+        '''Throws error if raw row is not length of header'''
         row = {}
         splitRowRaw = rawRow.split(self.splitterType)
         splitRow = []
@@ -36,6 +38,7 @@ class TableCsv:
     def __init__(self, csvFile, splitterType, progress=False, rowLimit=9999999999):
         '''Converting CSV file into a table'''
         self.path = csvFile
+        if progress == True: print(f"Opening {csvFile}")
         file = open(csvFile,'r',encoding='utf-8')
         self.file = file.read()
         file.close()
@@ -50,7 +53,7 @@ class TableCsv:
         for x in range(1, len(self.splitted)):
             if x > rowLimit: break
             self.rows.append(self.createRow(self.splitted[x]))
-            if progress == True: print(f"Row {x} added")
+            if progress == True: print(f"Row {x} loaded")
         self.splitted = None # Removes splitted for better Memory management
 
     def printItemTypes(self):
@@ -95,17 +98,22 @@ class TableCsv:
     def saveTo(self,flname):
         '''Saves table to a specified CSV file.'''
         with open(flname, 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=self.headish)
+            writer = csv.DictWriter(csvfile, fieldnames=self.headish, delimiter=';')
             writer.writeheader()
             writer.writerows(self.rows)
     def save(self):
         '''Saves table.'''
         with open(self.path, 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=self.headish)
+            writer = csv.DictWriter(csvfile, fieldnames=self.headish, delimiter=';')
             writer.writeheader()
             writer.writerows(self.rows)
+    def maxID(self):
+        if len(self.rows) == 0: return 0
+        sorte = sorted(self.rows, key=lambda x: x['id'], reverse=True)
 
-def CreateCsvTable(pth,hdrs, overwrite=None):
+        return int(sorte[0]['id'])
+
+def CreateCsvTable(pth,hdrs, overwrite=None, progress=False):
     '''Input file name and path, and an array of headers'''
     if "." in pth:
         if pth.split(".")[len(pth.split("."))-1] != "csv":
@@ -115,12 +123,15 @@ def CreateCsvTable(pth,hdrs, overwrite=None):
     if os.path.exists(pth) and overwrite is None:
         raise ValueError("File already exists and might be overwritten! add overwrite=True as parameter")
     with open(pth, 'w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=hdrs)
+        writer = csv.DictWriter(csvfile, fieldnames=hdrs, delimiter=';')
         writer.writeheader()
-    return TableCsv(pth, ",")
+    return TableCsv(pth, ";", progress=progress)
 
-'''
-tbl = CreateCsvTable("csvTests",["c0","c1","c2"], overwrite=True)         #- Creates a csv file and loads it into tbl variable
-tbl.rowAppend("String,10,the one before was a float")     #- Adds a row
-tbl.save()                                                #- Saves the file
-'''
+
+'''tbl = CreateCsvTable("csvTests",["id","c1","c2"], overwrite=True)         #- Creates a csv file and loads it into tbl variable
+tbl.rowAppend("2,10,the one before was a float")     #- Adds a row
+tbl.rowAppend("3,10,the one before was a float")
+tbl.rowAppend("4,10,the one before was a float")
+print(tbl.getRowsByValue("id",2))
+
+tbl.save() '''                                               #- Saves the file
